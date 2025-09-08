@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Contact Management App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* A little extra style for the select arrows */
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <div id="app" class="container mx-auto px-4 py-8 md:py-12">
+        
+        <header class="text-center mb-10">
+          <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">Player Directory</h1>
+          <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-500">A central hub for team and player information.</p>
+        </header>
+
+        <div class="sticky top-0 z-10 bg-gray-50/80 backdrop-blur-md py-4 mb-8">
+            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="md:col-span-2 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search by player or parent name..."
+                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                    />
+                </div>
+                <div class="relative">
+                     <select id="gradeFilter" class="w-full appearance-none bg-white py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                     </select>
+                </div>
+                <div class="relative">
+                     <select id="teamFilter" class="w-full appearance-none bg-white py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                     </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="playerCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Player cards will be injected here -->
+        </div>
+
+        <div id="noResults" class="text-center py-16 hidden">
+            <h3 class="text-xl font-semibold text-gray-700">No players found</h3>
+            <p class="text-gray-500 mt-2">Try adjusting your search or filter settings.</p>
+        </div>
+        
+      </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const playerData = [
+          {
+            "playerFirstName": "Mathilde",
+            "playerLastName": "Guyer",
+            "grade": "Grade 2",
+            "gender": "Female",
+            "tShirtSize": "S",
+            "parentFirstName": "Patrick",
+            "parentLastName": "Guyer",
+            "email": "patrick.guyer@gmail.com",
+            "phone": "207-450-0997",
+            "additionalContactName": "Marthe Hesselmans",
+            "additionalContactEmail": "mhesselmans@gmail.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Zoey",
+            "playerLastName": "Cargill",
+            "grade": "Grade 2",
+            "gender": "Female",
+            "tShirtSize": "S",
+            "parentFirstName": "Tamee",
+            "parentLastName": "Cargill",
+            "email": "tameecargill@gmail.com",
+            "phone": "2075571798",
+            "additionalContactName": "Shayne Cargill",
+            "additionalContactEmail": "shayne3133@aim.com",
+            "volunteer": null,
+            "team": "Cook Orthodontics",
+          },
+          {
+            "playerFirstName": "Dior",
+            "playerLastName": "Graham",
+            "grade": "Grade 2",
+            "gender": "Female",
+            "tShirtSize": "S",
+            "parentFirstName": "Denise",
+            "parentLastName": "Graham",
+            "email": "graham0929@gmail.com",
+            "phone": "207-446-4999",
+            "additionalContactName": "James Graham",
+            "additionalContactEmail": "james@corecutterusa.com",
+            "volunteer": null,
+            "team": "Kennebec Valley Animal Clinic"
+          },
+          {
+            "playerFirstName": "Cora",
+            "playerLastName": "Anderson",
+            "grade": "Grade 2",
+            "gender": "Female",
+            "tShirtSize": "S",
+            "parentFirstName": "Neil",
+            "parentLastName": "Anderson",
+            "email": "andersonnd@gmail.com",
+            "phone": "8608103507",
+            "additionalContactName": "Kate",
+            "additionalContactEmail": "kate.om.anderson@gmail.com",
+            "volunteer": null,
+            "team": "Cook Orthodontics",
+          },
+          {
+            "playerFirstName": "Adleia",
+            "playerLastName": "Dunn",
+            "grade": "Grade 2",
+            "gender": "Female",
+            "tShirtSize": "S",
+            "parentFirstName": "Veronica",
+            "parentLastName": "Trevino",
+            "email": "trevinoveronica333@gmail.com",
+            "phone": "2073139401",
+            "additionalContactName": null,
+            "additionalContactEmail": null,
+            "volunteer": null,
+            "team": "Kennebec Valley Animal Clinic"
+          },
+          {
+            "playerFirstName": "Wynter",
+            "playerLastName": "Mills",
+            "grade": "Grade 2",
+            "gender": "Female",
+            "tShirtSize": "M",
+            "parentFirstName": "Ashlie",
+            "parentLastName": "Dostie",
+            "email": "dostieashlie67@gmail.com",
+            "phone": "2078161013",
+            "additionalContactName": "Nickalaus Mills",
+            "additionalContactEmail": null,
+            "volunteer": "Assistant Coach (S - Women's Size)",
+          },
+          {
+            "playerFirstName": "Ciaran",
+            "playerLastName": "Murray",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "Brittney",
+            "parentLastName": "Tradd",
+            "email": "bmtradd94@gmail.com",
+            "phone": "6034097871",
+            "additionalContactName": "Gerard Murray",
+            "additionalContactEmail": "gerardmurray694@gmail.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Graham",
+            "playerLastName": "Geer",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "Eileen",
+            "parentLastName": "Geer",
+            "email": "geer.eileen@gmail.com",
+            "phone": "2073298502",
+            "additionalContactName": "Water Geer",
+            "additionalContactEmail": "geer.walter@gmail.com",
+            "volunteer": null,
+            "team": "Brookewood Realty",
+          },
+          {
+            "playerFirstName": "Greyson",
+            "playerLastName": "Theberge",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Alex",
+            "parentLastName": "Theberge",
+            "email": "alex.theberge@gmail.com",
+            "phone": "207-629-7633",
+            "additionalContactName": "Karry Theberge",
+            "additionalContactEmail": "ks.design@live.com",
+            "volunteer": "Assistant Coach (XL - Men's Size)",
+            "team": "Kennebec Valley Animal Clinic"
+          },
+          {
+            "playerFirstName": "Jack",
+            "playerLastName": "Longfellow",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "Bill",
+            "parentLastName": "Longfellow",
+            "email": "longfellow.bill@yahoo.com",
+            "phone": "2074418204",
+            "additionalContactName": "Heather Longfellow",
+            "additionalContactEmail": "heatherlongfellow@gmail.com",
+            "volunteer": null,
+            "team": "Brookewood Realty",
+          },
+          {
+            "playerFirstName": "Levi",
+            "playerLastName": "Caron",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Lindsay",
+            "parentLastName": "Caron",
+            "email": "NILESL529@GMAIL.COM",
+            "phone": "2074463690",
+            "additionalContactName": "Jacob Caron",
+            "additionalContactEmail": "jakec416@gmail.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Liam",
+            "playerLastName": "Keene",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Kevin",
+            "parentLastName": "Keene",
+            "email": "maineavenueautosales@gmail.com",
+            "phone": "2073802673",
+            "additionalContactName": "Shanley Bernheisel",
+            "additionalContactEmail": "maineavenueautosales@gmail.com",
+            "volunteer": "Assistant Coach (L - Men's Size)",
+            "team": "Kennebec Valley Animal Clinic"
+          },
+          {
+            "playerFirstName": "Jack",
+            "playerLastName": "Farady",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "David",
+            "parentLastName": "Farady",
+            "email": "david.farady@gmail.com",
+            "phone": "207-233-3496",
+            "additionalContactName": "Carly Lowell",
+            "additionalContactEmail": "carlenaelaine207@gmail.com",
+            "volunteer": "Assistant Coach (M - Men's Size)",
+          },
+          {
+            "playerFirstName": "Zabdiel",
+            "playerLastName": "Dorian",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Jewel",
+            "parentLastName": "Dorian",
+            "email": "jeweldorian@gmail.com",
+            "phone": "2074466627",
+            "additionalContactName": "Sheena forman",
+            "additionalContactEmail": "sheenaforman@gmail.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Max",
+            "playerLastName": "Albert",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Jacob",
+            "parentLastName": "Albert",
+            "email": "jacob.albert4@gmail.com",
+            "phone": "207-242-7040",
+            "additionalContactName": "Samantha Deming-Berr",
+            "additionalContactEmail": "samanthaberr@gmail.com",
+            "volunteer": null,
+            "team": "Cook Orthodontics",
+          },
+          {
+            "playerFirstName": "Dakota",
+            "playerLastName": "Tercyak",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "Anthony",
+            "parentLastName": "Tercyak",
+            "email": "anthonytercyak@yahoo.com",
+            "phone": "2075300078",
+            "additionalContactName": "Faith Grady",
+            "additionalContactEmail": null,
+            "volunteer": "Assistant Coach (XXL - Men's Size)",
+            "team": "Cook Orthodontics",
+          },
+          {
+            "playerFirstName": "Carson",
+            "playerLastName": "Burnell",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Rob",
+            "parentLastName": "Burnell",
+            "email": "rb92@icloud.com",
+            "phone": "3233377780",
+            "additionalContactName": "Ashley Edwards",
+            "additionalContactEmail": "cmbmom514@yahoo.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Rowan",
+            "playerLastName": "Cook",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Brian",
+            "parentLastName": "Cook",
+            "email": "briantcook@gmail.com",
+            "phone": "2072428898",
+            "additionalContactName": "Devin Cook",
+            "additionalContactEmail": "devinwcook@gmail.com",
+            "volunteer": "Coach (XL - Men's Size)",
+            "team": "Cook Orthodontics",
+          },
+          {
+            "playerFirstName": "Louis",
+            "playerLastName": "Johnson",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "Emmie",
+            "parentLastName": "Theberge",
+            "email": "emmie.theberge@gmail.com",
+            "phone": "207-837-8447",
+            "additionalContactName": "Joel Johnson",
+            "additionalContactEmail": "joeldouglasjohnson@gmail.com",
+            "volunteer": null,
+            "team": "Kennebec Valley Animal Clinic"
+          },
+          {
+            "playerFirstName": "Ryker",
+            "playerLastName": "Marcoux",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Jessica",
+            "parentLastName": "Despres",
+            "email": "jesrn0321@gmail.com",
+            "phone": "2073130924",
+            "additionalContactName": "Dan Marcoux",
+            "additionalContactEmail": "dcmarcoux34@aol.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Ray",
+            "playerLastName": "Lawton",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Marcela",
+            "parentLastName": "Lawton",
+            "email": "marcelasolawton@gmail.com",
+            "phone": "2072133818",
+            "additionalContactName": "Jarod Lawton",
+            "additionalContactEmail": "teamlawtonmartialarts@gmail.com",
+            "volunteer": null,
+            "team": "Kennebec Valley Animal Clinic"
+          },
+          {
+            "playerFirstName": "Finn",
+            "playerLastName": "Wynne",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "Patrick",
+            "parentLastName": "Wynne",
+            "email": "pbnwynne@yahoo.com",
+            "phone": "2076531175",
+            "additionalContactName": "Cara Armstrong",
+            "additionalContactEmail": "cara.s.armstrong@gmail.com",
+            "volunteer": "Assistant Coach (M - Men's Size)",
+          },
+          {
+            "playerFirstName": "Henry",
+            "playerLastName": "Ross",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "David",
+            "parentLastName": "Ross",
+            "email": "davidalanross@gmail.com",
+            "phone": "323-449-2544",
+            "additionalContactName": "Megan Carey",
+            "additionalContactEmail": "meganpcarey@gmail.com",
+            "volunteer": "Assistant Coach (M - Men's Size)",
+          },
+          {
+            "playerFirstName": "Leo",
+            "playerLastName": "Trudeau",
+            "grade": "Grade 2",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Maddy",
+            "parentLastName": "Siegler",
+            "email": "maddysiegler18@gmail.com",
+            "phone": "207-242-0324",
+            "additionalContactName": null,
+            "additionalContactEmail": null,
+            "volunteer": null,
+            "team": "Cook Orthodontics",
+          },
+          {
+            "playerFirstName": "Persy",
+            "playerLastName": "Piers-Gannon",
+            "grade": "Grade 2",
+            "gender": "non-binary",
+            "tShirtSize": "S",
+            "parentFirstName": "Ariel",
+            "parentLastName": "Piers-Gamble",
+            "email": "arielpiersgamble@gmail.com",
+            "phone": "2074490294",
+            "additionalContactName": null,
+            "additionalContactEmail": null,
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Brynlee",
+            "playerLastName": "Gray",
+            "grade": "Grade 2",
+            "gender": "Female",
+            "tShirtSize": "XS",
+            "parentFirstName": "Starr",
+            "parentLastName": "Gray",
+            "email": "banner314@gmail.com",
+            "phone": "2075924252",
+            "additionalContactName": null,
+            "additionalContactEmail": null,
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Aubrey",
+            "playerLastName": "Henderson",
+            "grade": "Grade 3",
+            "gender": "Female",
+            "tShirtSize": "Adult Size Small",
+            "parentFirstName": "Bri",
+            "parentLastName": "Henderson",
+            "email": "bhenderson@kidsrsu.org",
+            "phone": "2075224641",
+            "additionalContactName": null,
+            "additionalContactEmail": null,
+            "volunteer": "Assistant Coach (M - Women's Size)",
+            "team": "Brookewood Realty",
+          },
+          {
+            "playerFirstName": "Emily",
+            "playerLastName": "Meiczinger",
+            "grade": "Grade 3",
+            "gender": "Female",
+            "tShirtSize": "M",
+            "parentFirstName": "Karen",
+            "parentLastName": "Walsh-Meiczinger",
+            "email": "mkarenwalsh@hotmail.com",
+            "phone": "2078379874",
+            "additionalContactName": "Jeff Meiczinger",
+            "additionalContactEmail": "jeffm70@gmail.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Maera",
+            "playerLastName": "Urquhart",
+            "grade": "Grade 3",
+            "gender": "Female",
+            "tShirtSize": "L",
+            "parentFirstName": "Tracy",
+            "parentLastName": "Urquhart",
+            "email": "tracypallen@gmail.com",
+            "phone": "2073562713",
+            "additionalContactName": null,
+            "additionalContactEmail": "tracypallen@gmail.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Zinnia",
+            "playerLastName": "Almand-Hunter",
+            "grade": "Grade 3",
+            "gender": "Female",
+            "tShirtSize": "M",
+            "parentFirstName": "Berkeley",
+            "parentLastName": "Almand-Hunter",
+            "email": "berkeleyalmandhunter@gmail.com",
+            "phone": "2072420070",
+            "additionalContactName": "Andy",
+            "additionalContactEmail": "andrewalmandhunter@gmail.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Mackenzie",
+            "playerLastName": "Munzing",
+            "grade": "Grade 3",
+            "gender": "Female",
+            "tShirtSize": "L",
+            "parentFirstName": "Brittany",
+            "parentLastName": "Bourgeois-Munzing",
+            "email": "brittanybourgeois14@gmail.com",
+            "phone": "2076242528",
+            "additionalContactName": "Nate Munzing",
+            "additionalContactEmail": "nmunzing15@gmail.com",
+            "volunteer": null,
+            "team": "Kennebec Valley Animal Clinic"
+          },
+          {
+            "playerFirstName": "Ben",
+            "playerLastName": "Senft",
+            "grade": "Grade 3",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Emily",
+            "parentLastName": "Kalafarski",
+            "email": "emily.kalafarski@gmail.com",
+            "phone": "8572051663",
+            "additionalContactName": "Sam Senft",
+            "additionalContactEmail": "ssenft82@gmail.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Parker",
+            "playerLastName": "D'Alfonso",
+            "grade": "Grade 3",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "Casey",
+            "parentLastName": "D'Alfonso",
+            "email": "cassandra.dalfonso@yahoo.com",
+            "phone": "2072153334",
+            "additionalContactName": "Nick D'Alfonso",
+            "additionalContactEmail": "nicksproshop300@gmail.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Liam",
+            "playerLastName": "Duncklee",
+            "grade": "Grade 3",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "Stacia",
+            "parentLastName": "Duncklee",
+            "email": "stacia.duncklee@gmail.com",
+            "phone": "2072429248",
+            "additionalContactName": "Dylan Duncklee",
+            "additionalContactEmail": "dylanjduncklee@gmail.com",
+            "volunteer": null,
+            "team": "Cook Orthodontics",
+          },
+          {
+            "playerFirstName": "Wes",
+            "playerLastName": "Ledwin",
+            "grade": "Grade 3",
+            "gender": "Male",
+            "tShirtSize": "L",
+            "parentFirstName": "Sean",
+            "parentLastName": "Ledwin",
+            "email": "sledwin@gmail.com",
+            "phone": "5859433792",
+            "additionalContactName": "Rebecca McMahon",
+            "additionalContactEmail": "rebecca.e.mcmahon@gmail.com",
+            "volunteer": null,
+            "team": "Cook Orthodontics",
+          },
+          {
+            "playerFirstName": "Benjamin",
+            "playerLastName": "Robitaille",
+            "grade": "Grade 3",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Melissa",
+            "parentLastName": "Robitaille",
+            "email": "mmrobitaille15@gmail.com",
+            "phone": "2076923314",
+            "additionalContactName": null,
+            "additionalContactEmail": null,
+            "volunteer": null,
+            "team": "Kennebec Valley Animal Clinic"
+          },
+          {
+            "playerFirstName": "Ezrah",
+            "playerLastName": "Manners",
+            "grade": "Grade 3",
+            "gender": "Male",
+            "tShirtSize": "L",
+            "parentFirstName": "Shannon",
+            "parentLastName": "Klemanski",
+            "email": "sleemckenna@gmail.com",
+            "phone": "2073128355",
+            "additionalContactName": "Jamoy Manners",
+            "additionalContactEmail": "jahwest0@gmail.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Declan",
+            "playerLastName": "Session",
+            "grade": "Grade 3",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "Lynsey",
+            "parentLastName": "Session",
+            "email": "lseymour13@gmail.com",
+            "phone": "(207)680-5517",
+            "additionalContactName": "Derek Session",
+            "additionalContactEmail": "djsession6@gmail.com",
+            "volunteer": "Assistant Coach (L - Women's Size)",
+            "team": "Kennebec Valley Animal Clinic"
+          },
+          {
+            "playerFirstName": "Wylie",
+            "playerLastName": "Deem",
+            "grade": "Grade 3",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "John",
+            "parentLastName": "Deem",
+            "email": "johnjdeem@gmail.com",
+            "phone": "2078910449",
+            "additionalContactName": "Hannah Deem",
+            "additionalContactEmail": "hmunger89@gmail.com",
+            "volunteer": null,
+            "team": "Kennebec Valley Animal Clinic"
+          },
+          {
+            "playerFirstName": "Gunnar",
+            "playerLastName": "Irland",
+            "grade": "Grade 3",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "Elisha",
+            "parentLastName": "Irland",
+            "email": "eli@oaktable.me",
+            "phone": "2078120727",
+            "additionalContactName": "Stephanie Schredder",
+            "additionalContactEmail": "stephanie.schredder@gmail.com",
+            "volunteer": "Coach (M - Men's Size)",
+          },
+          {
+            "playerFirstName": "Teodoro",
+            "playerLastName": "Sirabella",
+            "grade": "Grade 3",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "Antonio",
+            "parentLastName": "Sirabella",
+            "email": "asirabella@gmail.com",
+            "phone": "2075570272",
+            "additionalContactName": "Liesl Beecher-Flad",
+            "additionalContactEmail": "lieslkelly@gmail.com",
+            "volunteer": null,
+            "team": "Brookewood Realty",
+          },
+          {
+            "playerFirstName": "Grant",
+            "playerLastName": "Benedict",
+            "grade": "Grade 3",
+            "gender": "Male",
+            "tShirtSize": "M",
+            "parentFirstName": "Adam",
+            "parentLastName": "Benedict",
+            "email": "akb025@gmail.com",
+            "phone": "2073194608",
+            "additionalContactName": "Alyssa Benedict",
+            "additionalContactEmail": "alynevben@gmail.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Carter",
+            "playerLastName": "Stagge",
+            "grade": "Grade 3",
+            "gender": "Male",
+            "tShirtSize": "S",
+            "parentFirstName": "Hannah",
+            "parentLastName": "Stagge",
+            "email": "hannahstagge@gmail.com",
+            "phone": "207-441-9512",
+            "additionalContactName": "Andrew Stagge",
+            "additionalContactEmail": "andrewstagge@live.com",
+            "volunteer": null,
+          },
+          {
+            "playerFirstName": "Gillian",
+            "playerLastName": "Fairfield",
+            "grade": "Grade 3",
+            "gender": "Female",
+            "tShirtSize": "S",
+            "parentFirstName": "Jonathan",
+            "parentLastName": "Fairield",
+            "email": "jdfairf@gmail.com",
+            "phone": "2076562265",
+            "additionalContactName": "Kelly Fairfield",
+            "additionalContactEmail": "kellyvfairfield@gmail.com",
+            "volunteer": "Assistant Coach (XL - Men's Size)",
+          },
+        ];
+
+        // --- DOM Elements ---
+        const searchInput = document.getElementById('searchInput');
+        const gradeFilter = document.getElementById('gradeFilter');
+        const teamFilter = document.getElementById('teamFilter');
+        const playerCardsContainer = document.getElementById('playerCardsContainer');
+        const noResults = document.getElementById('noResults');
+        
+        // --- State ---
+        const sortedPlayers = [...playerData].sort((a, b) => {
+            const lastNameComp = a.playerLastName.localeCompare(b.playerLastName);
+            if (lastNameComp !== 0) return lastNameComp;
+            return a.playerFirstName.localeCompare(b.playerFirstName);
+        });
+
+        // --- Functions ---
+        const getGenderColor = (gender) => {
+            switch (gender.toLowerCase()) {
+                case 'female': return 'bg-pink-100 text-pink-800';
+                case 'male': return 'bg-blue-100 text-blue-800';
+                default: return 'bg-purple-100 text-purple-800';
+            }
+        };
+        
+        const createPlayerCard = (player) => {
+            const teamDisplay = player.team 
+                ? `<span class="font-semibold text-indigo-700">${player.team}</span>`
+                : `<span class="text-gray-500 font-normal">Pending Assignment</span>`;
+
+            const additionalContactHTML = (player.additionalContactName || player.additionalContactEmail) ? `
+                <div class="mt-4 border-t border-gray-200 pt-4">
+                    <h4 class="text-sm font-semibold text-gray-600 mb-3">Additional Contact</h4>
+                    <div class="space-y-3">
+                        ${player.additionalContactName ? `
+                        <div class="flex items-center space-x-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            <span class="text-gray-800">${player.additionalContactName}</span>
+                        </div>` : ''}
+                        ${player.additionalContactEmail ? `
+                        <div class="flex items-center space-x-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            <a href="mailto:${player.additionalContactEmail}" class="text-indigo-600 hover:underline">${player.additionalContactEmail}</a>
+                        </div>` : ''}
+                    </div>
+                </div>` : '';
+            
+            const volunteerHTML = player.volunteer ? `
+                <div class="mt-4 border-t border-gray-200 pt-4">
+                    <div class="flex items-center space-x-2 text-yellow-600 bg-yellow-50 p-3 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <span class="text-sm font-semibold">${player.volunteer}</span>
+                    </div>
+                </div>` : '';
+
+            return `
+                <div class="bg-white rounded-xl shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
+                  <div class="p-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs text-indigo-500 font-semibold tracking-wide uppercase">${player.grade}</p>
+                            <h3 class="mt-1 text-2xl font-bold text-gray-900 leading-tight">${player.playerFirstName} ${player.playerLastName}</h3>
+                            <p class="mt-2 text-sm font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full inline-block">Team: ${teamDisplay}</p>
+                        </div>
+                        <div class="flex flex-col items-end space-y-2">
+                             <span class="px-2.5 py-0.5 rounded-full text-xs font-medium ${getGenderColor(player.gender)}">
+                                ${player.gender}
+                            </span>
+                             <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                Size: ${player.tShirtSize}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mt-6 border-t border-gray-200 pt-4">
+                        <h4 class="text-sm font-semibold text-gray-600 mb-3">Parent / Guardian Information</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <span class="text-gray-800">${player.parentFirstName} ${player.parentLastName}</span>
+                            </div>
+                            ${player.email ? `
+                            <div class="flex items-center space-x-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                <a href="mailto:${player.email}" class="text-indigo-600 hover:underline">${player.email}</a>
+                            </div>` : ''}
+                            ${player.phone ? `
+                            <div class="flex items-center space-x-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                <span class="text-gray-800">${player.phone}</span>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                    ${additionalContactHTML}
+                    ${volunteerHTML}
+                  </div>
+                </div>`;
+        };
+
+        const renderPlayers = (players) => {
+            playerCardsContainer.innerHTML = '';
+            if (players.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                players.forEach(player => {
+                    playerCardsContainer.innerHTML += createPlayerCard(player);
+                });
+            }
+        };
+
+        const applyFilters = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedGrade = gradeFilter.value;
+            const selectedTeam = teamFilter.value;
+
+            const filtered = sortedPlayers.filter(player => {
+                const fullName = `${player.playerFirstName} ${player.playerLastName}`.toLowerCase();
+                const parentName = `${player.parentFirstName} ${player.parentLastName}`.toLowerCase();
+                const searchMatch = fullName.includes(searchTerm) || parentName.includes(searchTerm);
+                
+                const gradeMatch = selectedGrade === 'All' || player.grade === selectedGrade;
+      
+                const teamMatch = selectedTeam === 'All Teams' || 
+                                (selectedTeam === 'Pending Assignment' && !player.team) ||
+                                player.team === selectedTeam;
+
+                return searchMatch && gradeMatch && teamMatch;
+            });
+            renderPlayers(filtered);
+        };
+
+        const populateFilters = () => {
+            const uniqueGrades = ['All', ...new Set(playerData.map(p => p.grade).sort())];
+            gradeFilter.innerHTML = uniqueGrades.map(grade => `<option value="${grade}">${grade}</option>`).join('');
+
+            const uniqueTeams = ['All Teams', ...Array.from(new Set(playerData.map(p => p.team).filter(Boolean))).sort(), 'Pending Assignment'];
+            teamFilter.innerHTML = uniqueTeams.map(team => `<option value="${team}">${team}</option>`).join('');
+        };
+
+        // --- Initialisation ---
+        populateFilters();
+        renderPlayers(sortedPlayers);
+
+        searchInput.addEventListener('input', applyFilters);
+        gradeFilter.addEventListener('change', applyFilters);
+        teamFilter.addEventListener('change', applyFilters);
+    });
+    </script>
+</body>
+</html>

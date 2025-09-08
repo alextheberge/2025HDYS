@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HDYS Division 2 Game Schedule</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles can go here if needed, but we'll primarily use Tailwind */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <header class="bg-teal-800 text-white p-6 rounded-xl mb-8 shadow-lg text-center">
+            <h1 class="text-3xl md:text-4xl font-bold">Division 2 Game Schedule</h1>
+            <p class="text-teal-200 mt-2">Fall 2025 Season</p>
+        </header>
+
+        <main id="schedule-container">
+            <!-- Schedule will be rendered here by JavaScript -->
+        </main>
+    </div>
+
+    <script>
+        // Data derived from the provided document
+        const scheduleData = [
+            { date: "2025-08-23", time: "08:00", team1: "Brookewood Realty", team2: "Kennebec Valley Animal Clinic" },
+            { date: "2025-08-23", time: "09:15", team1: "Cook Orthodontics", team2: "McKee Morgan" },
+            { date: "2025-08-23", time: "10:30", team1: "Cook Orthodontics", team2: "EJ Perry" },
+            { date: "2025-09-06", time: "08:00", team1: "Cook Orthodontics", team2: "McKee Morgan" },
+            { date: "2025-09-06", time: "09:15", team1: "Brookewood Realty", team2: "Kennebec Valley Animal Clinic" },
+            { date: "2025-09-06", time: "10:30", team1: "Brookewood Realty", team2: "EJ Perry" },
+            { date: "2025-09-13", time: "08:00", team1: "EJ Perry", team2: "Brookewood Realty" },
+            { date: "2025-09-13", time: "09:15", team1: "Kennebec Valley Animal Clinic", team2: "McKee Morgan" },
+            { date: "2025-09-13", time: "10:30", team1: "Kennebec Valley Animal Clinic", team2: "Cook Orthodontics" },
+            { date: "2025-09-20", time: "08:00", team1: "Cook Orthodontics", team2: "Kennebec Valley Animal Clinic" },
+            { date: "2025-09-20", time: "09:15", team1: "McKee Morgan", team2: "Brookewood Realty" },
+            { date: "2025-09-20", time: "10:30", team1: "McKee Morgan", team2: "EJ Perry" },
+            { date: "2025-09-27", time: "08:00", team1: "Cook Orthodontics", team2: "Brookewood Realty" },
+            { date: "2025-09-27", time: "09:15", team1: "EJ Perry", team2: "Kennebec Valley Animal Clinic" },
+            { date: "2025-09-27", time: "10:30", team1: "EJ Perry", team2: "McKee Morgan" },
+            { date: "2025-10-04", time: "08:00", team1: "Brookewood Realty", team2: "McKee Morgan" },
+            { date: "2025-10-04", time: "09:15", team1: "Cook Orthodontics", team2: "Kennebec Valley Animal Clinic" },
+            { date: "2025-10-04", time: "10:30", team1: "Cook Orthodontics", team2: "EJ Perry" },
+            { date: "2025-10-18", time: "08:00", team1: "Kennebec Valley Animal Clinic", team2: "McKee Morgan" },
+            { date: "2025-10-18", time: "09:15", team1: "Brookewood Realty", team2: "Cook Orthodontics" },
+            { date: "2025-10-18", time: "10:30", team1: "Brookewood Realty", team2: "EJ Perry" },
+            { date: "2025-10-25", time: null, team1: "Round Robin", team2: null }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('schedule-container');
+            if (!container) return;
+
+            // Group games by date
+            const gamesByDate = scheduleData.reduce((acc, game) => {
+                (acc[game.date] = acc[game.date] || []).push(game);
+                return acc;
+            }, {});
+
+            // Render schedule
+            for (const date in gamesByDate) {
+                const games = gamesByDate[date];
+                const dateGroup = document.createElement('div');
+                dateGroup.className = 'bg-white rounded-xl mb-6 shadow-lg overflow-hidden';
+
+                const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    timeZone: 'America/New_York'
+                });
+
+                const dateHeader = document.createElement('div');
+                dateHeader.className = 'bg-teal-600 text-white p-4 font-bold text-lg';
+                dateHeader.textContent = formattedDate;
+                dateGroup.appendChild(dateHeader);
+
+                games.forEach((game) => {
+                    if (game.time) {
+                        const gameEntry = document.createElement('div');
+                        gameEntry.className = 'flex flex-col md:flex-row justify-between items-start md:items-center p-4 border-b border-gray-200 last:border-b-0';
+
+                        const [hours, minutes] = game.time.split(':');
+                        const gameDate = new Date(date);
+                        gameDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
+                        const formattedTime = gameDate.toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                        });
+                        
+                        gameEntry.innerHTML = `
+                            <div class="flex items-center mb-3 md:mb-0 flex-grow w-full md:w-auto">
+                                <div class="font-bold w-24 text-teal-700">${formattedTime}</div>
+                                <div class="flex-grow text-gray-700">
+                                    <span class="font-semibold">${game.team1}</span>
+                                    <span class="text-gray-400 mx-2">vs</span>
+                                    <span class="font-semibold">${game.team2}</span>
+                                </div>
+                            </div>
+                            <button class="calendar-btn bg-teal-600 text-white px-4 py-2 rounded-lg cursor-pointer text-sm font-medium transition hover:bg-teal-700 whitespace-nowrap w-full md:w-auto" data-game-index="${scheduleData.indexOf(game)}">
+                                Add to Calendar
+                            </button>
+                        `;
+                        dateGroup.appendChild(gameEntry);
+                    } else {
+                        const specialEntry = document.createElement('div');
+                        specialEntry.className = 'p-4 italic text-gray-600 text-center font-medium';
+                        specialEntry.textContent = game.team1;
+                        dateGroup.appendChild(specialEntry);
+                    }
+                });
+                container.appendChild(dateGroup);
+            }
+
+            // Add event listener for all calendar buttons
+            container.addEventListener('click', (event) => {
+                if (event.target.classList.contains('calendar-btn')) {
+                    const gameIndex = event.target.dataset.gameIndex;
+                    const game = scheduleData[gameIndex];
+                    if (game) generateAndDownloadICal(game);
+                }
+            });
+        });
+
+        function generateAndDownloadICal(game) {
+            // Assume games are in Eastern Time (EDT for these dates).
+            const gameDurationHours = 1;
+
+            const startTime = new Date(`${game.date}T${game.time}:00`);
+            const endTime = new Date(startTime.getTime() + gameDurationHours * 60 * 60 * 1000);
+
+            // Format dates to iCal format (YYYYMMDDTHHMMSS)
+            // Note: We are not converting to UTC here, but providing the timezone ID.
+            // This generally works better across clients like Google Calendar and Outlook.
+            const toLocalICalString = (date) => {
+                const pad = (num) => (num < 10 ? '0' : '') + num;
+                return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+            }
+
+            const dtStart = toLocalICalString(startTime);
+            const dtEnd = toLocalICalString(endTime);
+            const dtStamp = new Date().toISOString().replace(/[-:]|\.\d{3}/g, '') + 'Z';
+            const uid = `${dtStart}-${game.team1.replace(/\s/g,'')}-vs-${game.team2.replace(/\s/g,'')}@hdys.local`;
+
+            const summary = `HDYS: ${game.team1} vs. ${game.team2}`;
+            const description = `HDYS Division 2 Soccer Game: ${game.team1} vs. ${game.team2}.`;
+            const location = 'Farmingdale, Maine, United States';
+            const timezone = 'America/New_York';
+
+            const icalContent = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//HDYS Schedule Generator//EN',
+                'BEGIN:VTIMEZONE',
+                'TZID:America/New_York',
+                'LAST-MODIFIED:20201011T015911Z',
+                'TZURL:http://tzurl.org/zoneinfo-outlook/America/New_York',
+                'X-LIC-LOCATION:America/New_York',
+                'BEGIN:DAYLIGHT',
+                'TZNAME:EDT',
+                'TZOFFSETFROM:-0500',
+                'TZOFFSETTO:-0400',
+                'DTSTART:19700308T020000',
+                'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU',
+                'END:DAYLIGHT',
+                'BEGIN:STANDARD',
+                'TZNAME:EST',
+                'TZOFFSETFROM:-0400',
+                'TZOFFSETTO:-0500',
+                'DTSTART:19701101T020000',
+                'RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU',
+                'END:STANDARD',
+                'END:VTIMEZONE',
+                'BEGIN:VEVENT',
+                `UID:${uid}`,
+                `DTSTAMP:${dtStamp}`,
+                `DTSTART;TZID=${timezone}:${dtStart}`,
+                `DTEND;TZID=${timezone}:${dtEnd}`,
+                `SUMMARY:${summary}`,
+                `DESCRIPTION:${description}`,
+                `LOCATION:${location}`,
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].join('\r\n');
+
+            const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${game.date}-${game.team1.replace(/\s/g, '_')}-vs-${game.team2.replace(/\s/g, '_')}.ics`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+
+</body>
+</html>
